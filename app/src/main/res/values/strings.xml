@@ -62,10 +62,12 @@
 
 
     <!-- Language-specific constants -->
-    <string name="today">Today</string>
+    <!--<string name="today">Today</string>-->
+    <string name="today">Aujourd\'hui</string>
 
     <!-- For labelling tomorrow's forecast [CHAR LIMIT=15] -->
-    <string name="tomorrow">Tomorrow</string>
+    <!--<string name="tomorrow">Tomorrow</string>-->
+    <string name="tomorrow">Demain</string>
 
     <!-- Date format [CHAR LIMIT=NONE] -->
     <string name="format_full_friendly_date"><xliff:g id="month">%1$s</xliff:g>, <xliff:g id="day">%2$s</xliff:g></string>
