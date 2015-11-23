@@ -20,7 +20,8 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("Sunshine", "onCreate " + this.getClass().getSimpleName());
+        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
+                " : :  ");
         mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

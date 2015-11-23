@@ -12,6 +12,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
+
+import com.example.android.sunshine.Utility;
 
 public class WeatherProvider extends ContentProvider {
 
@@ -309,6 +312,8 @@ public class WeatherProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case WEATHER:
+                Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + " : " + Utility
+                        .thread() + " : nb rowsInserted :  object created");
                 db.beginTransaction();
                 int returnCount = 0;
                 try {

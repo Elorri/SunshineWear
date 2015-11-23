@@ -408,6 +408,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
+
+            Log.d("Json", Thread.currentThread().getStackTrace()[2] + ": "
+                    + Utility.thread() + " : InputStream json : object created");
             // Read the input stream into a String
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
