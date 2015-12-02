@@ -54,7 +54,7 @@ public class LocationEditTextPreference extends EditTextPreference {
             public void afterTextChanged(Editable s) {
                 Dialog d = getDialog();
                 //We know it's an AlertDialog because we have looked the EditTextPreference doc,
-                // but if it change in the future we don't want our app to crash. 
+                // but if it change in the future we don't want our app to crash.
                 if (d instanceof AlertDialog) {
                     AlertDialog dialog = (AlertDialog) d;
                     Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
