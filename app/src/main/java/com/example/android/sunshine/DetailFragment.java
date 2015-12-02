@@ -14,7 +14,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,7 +23,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.android.sunshine.data.WeatherContract;
+import com.example.android.sunshine.data.WeatherContract.WeatherEntry;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -43,27 +44,27 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int DETAIL_LOADER = 0;
 
     private static final String[] DETAIL_COLUMNS = {
-            WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
-            WeatherContract.WeatherEntry.COLUMN_DATE,
-            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
-            WeatherContract.WeatherEntry.COLUMN_PRESSURE,
-            WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
-            WeatherContract.WeatherEntry.COLUMN_DEGREES,
-            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
+            WeatherEntry.TABLE_NAME + "." + WeatherEntry._ID,
+            WeatherEntry.COLUMN_DATE,
+            WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherEntry.COLUMN_HUMIDITY,
+            WeatherEntry.COLUMN_PRESSURE,
+            WeatherEntry.COLUMN_WIND_SPEED,
+            WeatherEntry.COLUMN_DEGREES,
+            WeatherEntry.COLUMN_WEATHER_ID,
             // This works because the WeatherProvider returns location data joined with
             // weather data, even though they're stored in two different tables.
             WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
     };
 
-    // these constants correspond to the projection defined above, and must change if the
-    // projection changes
-    private static final int COL_WEATHER_ID = 0;
-    private static final int COL_WEATHER_DATE = 1;
-    private static final int COL_WEATHER_DESC = 2;
-    private static final int COL_WEATHER_MAX_TEMP = 3;
+    // These indices are tied to DETAIL_COLUMNS.  If DETAIL_COLUMNS changes, these
+    // must change.
+    public static final int COL_WEATHER_ID = 0;
+    public static final int COL_WEATHER_DATE = 1;
+    public static final int COL_WEATHER_DESC = 2;
+    public static final int COL_WEATHER_MAX_TEMP = 3;
     public static final int COL_WEATHER_MIN_TEMP = 4;
     public static final int COL_WEATHER_HUMIDITY = 5;
     public static final int COL_WEATHER_PRESSURE = 6;
@@ -88,9 +89,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
-                " : DetailFragment.mDetailListView :  object created");
-
 
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -118,8 +116,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Retrieve the share menu item
         MenuItem menuItem = menu.findItem(R.id.action_share);
 
-        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
-                " : ShareActionProvider :  object created");
         // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
 
@@ -130,8 +126,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private Intent createShareForecastIntent() {
-        Log.e("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
-                " : Intent shareIntent :  change state");
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
@@ -145,7 +139,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onActivityCreated(savedInstanceState);
     }
 
-    void onLocationChanged(String newLocation) {
+    void onLocationChanged( String newLocation ) {
         // replace the uri, since the location has changed
         Uri uri = mUri;
         if (null != uri) {
@@ -158,7 +152,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (null != mUri) {
+        if ( null != mUri ) {
             // Now create and return a CursorLoader that will take care of
             // creating a Cursor for the data being displayed.
             return new CursorLoader(
@@ -178,8 +172,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (data != null && data.moveToFirst()) {
             // Read weather condition ID from cursor
             int weatherId = data.getInt(COL_WEATHER_CONDITION_ID);
+
             // Use weather art image
-            mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
+            Glide.with(this)
+                    .load(Utility.getArtUrlForWeatherCondition(getActivity(), weatherId))
+                    .error(Utility.getArtResourceForWeatherCondition(weatherId))
+                    .crossFade()
+                    .into(mIconView);
 
             // Read date from cursor and update views for day of week and date
             long date = data.getLong(COL_WEATHER_DATE);
@@ -188,16 +187,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mFriendlyDateView.setText(friendlyDateText);
             mDateView.setText(dateText);
 
-
             // Get description from weather condition ID
             String description = Utility.getStringForWeatherCondition(getActivity(), weatherId);
             mDescriptionView.setText(description);
+            mDescriptionView.setContentDescription(getString(R.string.a11y_forecast, description));
 
             // For accessibility, add a content description to the icon field. Because the ImageView
             // is independently focusable, it's better to have a description of the image. Using
             // null is appropriate when the image is purely decorative or when the image already
             // has text describing it in the same UI component.
             mIconView.setContentDescription(getString(R.string.a11y_forecast_icon, description));
+
+            // Read high temperature from cursor and update view
+            boolean isMetric = Utility.isMetric(getActivity());
 
             double high = data.getDouble(COL_WEATHER_MAX_TEMP);
             String highString = Utility.formatTemperature(getActivity(), high);
@@ -237,6 +239,5 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-    }
+    public void onLoaderReset(Loader<Cursor> loader) { }
 }
