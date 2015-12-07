@@ -43,7 +43,6 @@
     <string name="pref_enable_notifications_default" translatable="false">true</string>
 
 
-
     <!-- Strings for formatting weather-related data -->
 
     <!-- Label for the temperature units preference [CHAR LIMIT=30] -->
@@ -66,8 +65,6 @@
 
     <!-- Key name for storing location status in SharedPreferences -->
     <string name="pref_location_status_key" translatable="false">loc-status</string>
-
-
 
 
     <!-- Language-specific constants -->
@@ -143,11 +140,14 @@
     <string name="condition_602">Heavy Snow</string>
     <string name="condition_611">Sleet</string>
     <string name="condition_612">Shower Sleet</string>
-    <string name="condition_615">Rain and Snow</string> <!-- light rain and snow -->
+    <string name="condition_615">Rain and Snow</string>
+    <!-- light rain and snow -->
     <string name="condition_616">Rain and Snow</string>
-    <string name="condition_620">Shower Snow</string> <!-- light shower snow -->
+    <string name="condition_620">Shower Snow</string>
+    <!-- light shower snow -->
     <string name="condition_621">Shower Snow</string>
-    <string name="condition_622">Shower Snow</string> <!-- heavy shower snow -->
+    <string name="condition_622">Shower Snow</string>
+    <!-- heavy shower snow -->
     <string name="condition_701">Mist</string>
     <string name="condition_711">Smoke</string>
     <string name="condition_721">Haze</string>
@@ -173,7 +173,8 @@
     <string name="condition_951">Calm</string>
     <string name="condition_952">Light Breeze</string>
     <string name="condition_953">Gentle Breeze</string>
-    <string name="condition_954">Breeze</string> <!-- moderate breeze -->
+    <string name="condition_954">Breeze</string>
+    <!-- moderate breeze -->
     <string name="condition_955">Fresh Breeze</string>
     <string name="condition_956">Strong Breeze</string>
     <string name="condition_957">High Wind</string>
@@ -204,6 +205,8 @@
     <!-- Value in SharedPreferences for cute dogs art pack  option [CHAR LIMIT=NONE] -->
     <string name="pref_art_pack_cute_dogs" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-mdpi/art_%s.png</string>
 
+    <!-- Used to form a severe weather alert that reads "Heads up: <weather> in <location>!" -->
+    <string name="gcm_weather_alert">Heads up: %1$s in %2$s!</string>
 
     // TODO: Get the SenderID from the Developer Console
     <string name="gcm_defaultSenderId" translatable="false"></string>
