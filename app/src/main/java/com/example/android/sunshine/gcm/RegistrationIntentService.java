@@ -16,6 +16,7 @@ import com.google.android.gms.iid.InstanceID;
 
 
 public class RegistrationIntentService extends IntentService {
+
     private static final String TAG = "RegIntentService";
 
     public RegistrationIntentService() {
