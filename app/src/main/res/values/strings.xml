@@ -205,4 +205,8 @@
     <string name="pref_art_pack_cute_dogs" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-mdpi/art_%s.png</string>
 
 
+    // TODO: Get the SenderID from the Developer Console
+    <string name="gcm_defaultSenderId" translatable="false"></string>
+
+
 </resources>
