@@ -27,6 +27,9 @@
     <!-- Key name for storing location in SharedPreferences [CHAR LIMIT=NONE] -->
     <string name="pref_location_key" translatable="false">location</string>
 
+    <!-- Key name for storing location status in SharedPreferences -->
+    <string name="pref_location_status_key" translatable="false">loc-status</string>
+
     <!-- Default postal code for location preference [CHAR LIMIT=NONE] -->
     <string name="pref_location_default" translatable="false">94043</string>
 
@@ -41,7 +44,6 @@
     <string name="pref_enable_notifications_true">Enabled</string>
     <string name="pref_enable_notifications_false">Not Enabled</string>
     <string name="pref_enable_notifications_default" translatable="false">true</string>
-
 
     <!-- Strings for formatting weather-related data -->
 
@@ -63,17 +65,29 @@
     <!-- Value in SharedPreferences for imperial temperature unit option [CHAR LIMIT=NONE] -->
     <string name="pref_units_imperial" translatable="false">imperial</string>
 
-    <!-- Key name for storing location status in SharedPreferences -->
-    <string name="pref_location_status_key" translatable="false">loc-status</string>
+    <!-- Label for the art pack preference [CHAR LIMIT=30] -->
+    <string name="pref_art_pack_label">Icon Pack</string>
 
+    <!-- Label for Sunshine option in art pack preference [CHAR LIMIT=25] -->
+    <string name="pref_art_pack_label_sunshine">Sunshine</string>
+
+    <!-- Label for cute dogs option in art pack preference [CHAR LIMIT=25] -->
+    <string name="pref_art_pack_label_cute_dogs">Cute dogs</string>
+
+    <!-- Key name for art pack unit preference in SharedPreferences [CHAR LIMIT=NONE] -->
+    <string name="pref_art_pack_key" translatable="false">art_pack</string>
+
+    <!-- Value in SharedPreferences for Sunshine art pack option [CHAR LIMIT=NONE] -->
+    <string name="pref_art_pack_sunshine" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-xxhdpi/art_%s.png</string>
+
+    <!-- Value in SharedPreferences for cute dogs art pack  option [CHAR LIMIT=NONE] -->
+    <string name="pref_art_pack_cute_dogs" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-mdpi/art_%s.png</string>
 
     <!-- Language-specific constants -->
-    <!--<string name="today">Today</string>-->
-    <string name="today">Aujourd\'hui</string>
+    <string name="today">Today</string>
 
     <!-- For labelling tomorrow's forecast [CHAR LIMIT=15] -->
-    <!--<string name="tomorrow">Tomorrow</string>-->
-    <string name="tomorrow">Demain</string>
+    <string name="tomorrow">Tomorrow</string>
 
     <!-- Date format [CHAR LIMIT=NONE] -->
     <string name="format_full_friendly_date"><xliff:g id="month">%1$s</xliff:g>, <xliff:g id="day">%2$s</xliff:g></string>
@@ -82,23 +96,23 @@
     <!-- Temperature format [CHAR LIMIT=5 -->
     <string name="format_temperature"><xliff:g id="temp">%1.0f</xliff:g>\u00B0</string>
 
+    <string name="wind">Wind</string>
     <!-- Windspeed formats -->
     <!-- Wind in mph [CHAR LIMIT=25] -->
-    <string name="format_wind_mph">Wind: <xliff:g id="speed">%1$1.0f</xliff:g> mph <xliff:g id="direction">%2$s</xliff:g></string>
+    <string name="format_wind_mph"><xliff:g id="speed">%1$1.0f</xliff:g> mph <xliff:g id="direction">%2$s</xliff:g></string>
     <!-- Wind in kph [CHAR LIMIT=25] -->
-    <string name="format_wind_kmh">Wind: <xliff:g id="speed">%1$1.0f</xliff:g> km/h <xliff:g id="direction">%2$s</xliff:g></string>
+    <string name="format_wind_kmh"><xliff:g id="speed">%1$1.0f</xliff:g> km/h <xliff:g id="direction">%2$s</xliff:g></string>
 
+    <string name="pressure">Pressure</string>
     <!-- Pressure format CHAR LIMIT=25] -->
-    <string name="format_pressure">Pressure: <xliff:g id="pressure">%1.0f</xliff:g> hPa</string>
+    <string name="format_pressure"><xliff:g id="pressure">%1.0f</xliff:g> hPa</string>
 
+    <string name="humidity">Humidity</string>
     <!-- Humidity format CHAR LIMIT=25]-->
-    <string name="format_humidity">Humidity: <xliff:g id="humidity">%1.0f</xliff:g> %%</string>
+    <string name="format_humidity"><xliff:g id="humidity">%1.0f</xliff:g> %%</string>
 
     <!-- SyncAdapter related -->
-    <!-- that the account is specific to our SunshineApp-->
     <string name="sync_account_type">sunshine.example.com</string>
-
-    <!-- Uri authority for our content provider-->
     <string name="content_authority">com.example.android.sunshine</string>
 
     <!-- Notification Format -->
@@ -114,13 +128,14 @@
     <string name="empty_forecast_list_server_error">No weather information available. The server is not returning valid data. Please check for an updated version of Sunshine.</string>
     <string name="empty_forecast_list_invalid_location">No weather information available. The location in settings is not recognized by the weather server.</string>
 
-
     <!-- A11y -->
     <string name="a11y_forecast">Forecast: <xliff:g id="condition">%1$s</xliff:g></string>
     <string name="a11y_forecast_icon">Forecast icon: <xliff:g id="condition">%1$s</xliff:g></string>
     <string name="a11y_high_temp">High: <xliff:g id="high">%1$s</xliff:g></string>
     <string name="a11y_low_temp">Low: <xliff:g id="low">%1$s</xliff:g></string>
-
+    <string name="a11y_humidity">Humidity: <xliff:g id="humidity">%1$s</xliff:g></string>
+    <string name="a11y_pressure">Barometric Pressure: <xliff:g id="pressure">%1$s</xliff:g></string>
+    <string name="a11y_wind">Wind speed and direction: <xliff:g id="wind">%1$s</xliff:g></string>
 
     <!-- Weather Conditions -->
     <string name="condition_2xx">Storm</string>
@@ -140,14 +155,11 @@
     <string name="condition_602">Heavy Snow</string>
     <string name="condition_611">Sleet</string>
     <string name="condition_612">Shower Sleet</string>
-    <string name="condition_615">Rain and Snow</string>
-    <!-- light rain and snow -->
+    <string name="condition_615">Rain and Snow</string> <!-- light rain and snow -->
     <string name="condition_616">Rain and Snow</string>
-    <string name="condition_620">Shower Snow</string>
-    <!-- light shower snow -->
+    <string name="condition_620">Shower Snow</string> <!-- light shower snow -->
     <string name="condition_621">Shower Snow</string>
-    <string name="condition_622">Shower Snow</string>
-    <!-- heavy shower snow -->
+    <string name="condition_622">Shower Snow</string> <!-- heavy shower snow -->
     <string name="condition_701">Mist</string>
     <string name="condition_711">Smoke</string>
     <string name="condition_721">Haze</string>
@@ -173,8 +185,7 @@
     <string name="condition_951">Calm</string>
     <string name="condition_952">Light Breeze</string>
     <string name="condition_953">Gentle Breeze</string>
-    <string name="condition_954">Breeze</string>
-    <!-- moderate breeze -->
+    <string name="condition_954">Breeze</string> <!-- moderate breeze -->
     <string name="condition_955">Fresh Breeze</string>
     <string name="condition_956">Strong Breeze</string>
     <string name="condition_957">High Wind</string>
@@ -186,30 +197,8 @@
 
     <string name="condition_unknown">Unknown (<xliff:g id="low">%1$s</xliff:g>)</string>
 
-
-    <!-- Label for the art pack preference [CHAR LIMIT=30] -->
-    <string name="pref_art_pack_label">Icon Pack</string>
-
-    <!-- Label for Sunshine option in art pack preference [CHAR LIMIT=25] -->
-    <string name="pref_art_pack_label_sunshine">Sunshine</string>
-
-    <!-- Label for cute dogs option in art pack preference [CHAR LIMIT=25] -->
-    <string name="pref_art_pack_label_cute_dogs">Cute dogs</string>
-
-    <!-- Key name for art pack unit preference in SharedPreferences [CHAR LIMIT=NONE] -->
-    <string name="pref_art_pack_key" translatable="false">art_pack</string>
-
-    <!-- Value in SharedPreferences for Sunshine art pack option [CHAR LIMIT=NONE] -->
-    <string name="pref_art_pack_sunshine" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-xxhdpi/art_%s.png</string>
-
-    <!-- Value in SharedPreferences for cute dogs art pack  option [CHAR LIMIT=NONE] -->
-    <string name="pref_art_pack_cute_dogs" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-mdpi/art_%s.png</string>
-
     <!-- Used to form a severe weather alert that reads "Heads up: <weather> in <location>!" -->
     <string name="gcm_weather_alert">Heads up: %1$s in %2$s!</string>
-
     // TODO: Get the SenderID from the Developer Console
-    <string name="gcm_defaultSenderId" translatable="false">693323573894</string>
-
-
+    <string name="gcm_defaultSenderId" translatable="false"></string>
 </resources>
