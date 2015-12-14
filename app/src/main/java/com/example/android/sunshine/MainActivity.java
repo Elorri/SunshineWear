@@ -5,7 +5,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +16,7 @@ import com.example.android.sunshine.sync.SunshineSyncAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -32,6 +33,11 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         if (findViewById(R.id.weather_detail_container) != null) {
             // The detail container view will be present only in the large-screen layouts
             // (res/layout-sw600dp). If this view is present, then the activity should be
@@ -60,19 +66,19 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         // skip the registration and this device will not receive any downstream messages from
         // our fake server. Because weather alerts are not a core feature of the app, this should
         // not affect the behavior of the app, from a user perspective.
-        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2]+"in " +
-                "checkPlayServices "+checkPlayServices() );
+        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + "in " +
+                "checkPlayServices " + checkPlayServices());
         if (checkPlayServices()) {
-            Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2]+"in checkPlayServices" );
+            Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + "in checkPlayServices");
             // Because this is the initial creation of the app, we'll want to be certain we have
             // a token. If we do not, then we will start the IntentService that will register this
             // application with GCM.
             SharedPreferences sharedPreferences =
                     PreferenceManager.getDefaultSharedPreferences(this);
             boolean sentToken = sharedPreferences.getBoolean(SENT_TOKEN_TO_SERVER, false);
-            Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2]+"in !sentToken"+!sentToken );
+            Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + "in !sentToken" + !sentToken);
             if (!sentToken) {
-                Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2]+"in !sentToken" );
+                Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + "in !sentToken");
                 Intent intent = new Intent(this, RegistrationIntentService.class);
                 startService(intent);
             }
@@ -100,7 +106,6 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         }
         return super.onOptionsItemSelected(item);
     }
-
 
 
     @Override
@@ -152,7 +157,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
-            Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2]+"" );
+            Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + "");
             if (apiAvailability.isUserResolvableError(resultCode)) {
                 apiAvailability.getErrorDialog(this, resultCode,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
