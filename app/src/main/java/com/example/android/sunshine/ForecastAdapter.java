@@ -56,18 +56,21 @@ public class ForecastAdapter extends CursorAdapter {
         // Choose the layout type
         int viewType = getItemViewType(cursor.getPosition());
         int layoutId = -1;
+        View view=null;
         switch (viewType) {
             case VIEW_TYPE_TODAY: {
                 layoutId = R.layout.list_item_forecast_today;
+                view = LayoutInflater.from(context).inflate(layoutId, parent, false);
                 break;
             }
             case VIEW_TYPE_FUTURE_DAY: {
                 layoutId = R.layout.list_item_forecast;
+                view = LayoutInflater.from(context).inflate(layoutId, parent, false);
                 break;
             }
         }
 
-        View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
+        //View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
 
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
