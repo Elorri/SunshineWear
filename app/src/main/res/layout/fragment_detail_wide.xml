@@ -13,8 +13,7 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            >
+            android:layout_weight="1" >
 
             <include layout="@layout/detail_today_grid"
                      android:layout_width="match_parent"
@@ -105,8 +104,7 @@
                 android:gravity="center_vertical"
                 tools:text="4km/h NW"
                 android:textColor="@android:color/white"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                />
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <android.support.v7.widget.Space
                 app:layout_columnSpan="2"
