@@ -375,7 +375,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             TextView tv = (TextView) getView().findViewById(R.id.recyclerview_forecast_empty);
             if (null != tv) {
                 // if cursor is empty, why? do we have an invalid location
-                int message = R.string.recyclerview_forecast_empty;
+                int message = R.string.empty_forecast_list;
                 @SunshineSyncAdapter.LocationStatus int location = Utility.getLocationStatus(getActivity());
                 switch (location) {
                     case SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN:
