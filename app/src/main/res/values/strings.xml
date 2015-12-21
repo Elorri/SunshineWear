@@ -210,4 +210,7 @@
 
     <!-- For Shared Element Transitions -->
     <string name="detail_icon_transition_name" translatable="false">TN_DetailIcon</string>
+
+    <!-- Strings related to Muzei Source -->
+    <string name="muzei_description">Today\'s weather</string>
 </resources>
