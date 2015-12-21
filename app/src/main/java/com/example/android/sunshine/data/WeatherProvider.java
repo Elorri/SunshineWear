@@ -312,8 +312,7 @@ public class WeatherProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case WEATHER:
-                Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + " : " + Utility
-                        .thread() + " : nb rowsInserted :  object created");
+                Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + " : " + Utility.thread() + " : nb rowsInserted :  object created");
                 db.beginTransaction();
                 int returnCount = 0;
                 try {

@@ -30,7 +30,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     // Flag to determine if we want to use a separate view for "today".
     private boolean mUseTodayLayout = true;
 
-
     private Cursor mCursor;
     final private Context mContext;
     final private ForecastAdapterOnClickHandler mClickHandler;
@@ -80,16 +79,15 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     }
 
     /*
-    This takes advantage of the fact that the viewGroup passed to onCreateViewHolder is the
-    RecyclerView that will be used to contain the view, so that it can get the current
-    ItemSelectionManager from the view.
-    One could implement this pattern without modifying RecyclerView by taking advantage
-    of the view tag to store the ItemChoiceManager.
- */
+        This takes advantage of the fact that the viewGroup passed to onCreateViewHolder is the
+        RecyclerView that will be used to contain the view, so that it can get the current
+        ItemSelectionManager from the view.
+        One could implement this pattern without modifying RecyclerView by taking advantage
+        of the view tag to store the ItemChoiceManager.
+     */
     @Override
     public ForecastAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        if (viewGroup instanceof RecyclerView) {
-            // Choose the layout type
+        if ( viewGroup instanceof RecyclerView ) {
             int layoutId = -1;
             switch (viewType) {
                 case VIEW_TYPE_TODAY: {
@@ -101,9 +99,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
                     break;
                 }
             }
-            View view = LayoutInflater.from(viewGroup.getContext()).inflate(layoutId, viewGroup,
-                    false);
-            viewGroup.setFocusable(true);
+            View view = LayoutInflater.from(viewGroup.getContext()).inflate(layoutId, viewGroup, false);
+            view.setFocusable(true);
             return new ForecastAdapterViewHolder(view);
         } else {
             throw new RuntimeException("Not bound to RecyclerView");
@@ -112,22 +109,23 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
-
         mCursor.moveToPosition(position);
         int weatherId = mCursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
         int defaultImage;
+        boolean useLongToday;
 
         switch (getItemViewType(position)) {
             case VIEW_TYPE_TODAY:
                 defaultImage = Utility.getArtResourceForWeatherCondition(weatherId);
+                useLongToday = true;
                 break;
             default:
                 defaultImage = Utility.getIconResourceForWeatherCondition(weatherId);
+                useLongToday = false;
         }
 
-        if (Utility.usingLocalGraphics(mContext)) {
-            forecastAdapterViewHolder.mIconView.
-                    setImageResource(defaultImage);
+        if ( Utility.usingLocalGraphics(mContext) ) {
+            forecastAdapterViewHolder.mIconView.setImageResource(defaultImage);
         } else {
             Glide.with(mContext)
                     .load(Utility.getArtUrlForWeatherCondition(mContext, weatherId))
@@ -142,11 +140,13 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
         // Read date from cursor
         long dateInMillis = mCursor.getLong(ForecastFragment.COL_WEATHER_DATE);
+
         // Find TextView and set formatted date on it
-        forecastAdapterViewHolder.mDateView.setText(Utility.getFriendlyDayString(mContext, dateInMillis));
+        forecastAdapterViewHolder.mDateView.setText(Utility.getFriendlyDayString(mContext, dateInMillis, useLongToday));
 
         // Read weather forecast from cursor
         String description = Utility.getStringForWeatherCondition(mContext, weatherId);
+
         // Find TextView and set weather forecast on it
         forecastAdapterViewHolder.mDescriptionView.setText(description);
         forecastAdapterViewHolder.mDescriptionView.setContentDescription(mContext.getString(R.string.a11y_forecast, description));
@@ -170,7 +170,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         mICM.onBindViewHolder(forecastAdapterViewHolder, position);
     }
 
-
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         mICM.onRestoreInstanceState(savedInstanceState);
     }
@@ -179,12 +178,12 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         mICM.onSaveInstanceState(outState);
     }
 
-    public int getSelectedItemPosition() {
-        return mICM.getSelectedItemPosition();
-    }
-
     public void setUseTodayLayout(boolean useTodayLayout) {
         mUseTodayLayout = useTodayLayout;
+    }
+
+    public int getSelectedItemPosition() {
+        return mICM.getSelectedItemPosition();
     }
 
     @Override
@@ -194,7 +193,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public int getItemCount() {
-        if (null == mCursor) return 0;
+        if ( null == mCursor ) return 0;
         return mCursor.getCount();
     }
 
