@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -46,6 +48,10 @@ import java.util.concurrent.TimeUnit;
 public class MyWatchFace extends CanvasWatchFaceService {
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
+
+
+    private static final Typeface BOLD_TYPEFACE =
+            Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
 
     /**
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
@@ -84,10 +90,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
     }
 
     private class Engine extends CanvasWatchFaceService.Engine {
-        final Handler mUpdateTimeHandler = new EngineHandler(this);
-        boolean mRegisteredTimeZoneReceiver = false;
-        Paint mBackgroundPaint;
-        Paint mTextPaint;
+        private final Handler mUpdateTimeHandler = new EngineHandler(this);
+        private boolean mRegisteredTimeZoneReceiver = false;
+        private  Paint mBackgroundPaint;
+        private Paint mTextTimePaint;
+        private Paint mTextTimeBoldPaint;
+        private Paint mTextDatePaint;
+        private  Paint mTextTemperaturePaint;
+        private  Paint mTextTemperatureBoldPaint;
+        private Paint mLinePaint;
+        private Rect mTextBounds=new Rect();
         boolean mAmbient;
         Time mTime;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -97,7 +109,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 mTime.setToNow();
             }
         };
-        int mTapCount;
+
 
         float mXOffset;
         float mYOffset;
@@ -107,6 +119,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
          * disable anti-aliasing in ambient mode.
          */
         boolean mLowBitAmbient;
+        private Bitmap mWeatherIcon;
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -123,8 +137,27 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
-            mTextPaint = new Paint();
-            mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mTextTimeBoldPaint = new Paint();
+            mTextTimeBoldPaint = createBoldTextPaint(resources.getColor(R.color.primary_text));
+            mTextTimePaint = new Paint();
+            mTextTimePaint = createTextPaint(resources.getColor(R.color.primary_text));
+
+
+            mTextDatePaint = new Paint();
+            mTextDatePaint = createTextPaint(resources.getColor(R.color.secondary_text));
+
+            mTextTemperatureBoldPaint = new Paint();
+            mTextTemperatureBoldPaint = createBoldTextPaint(resources.getColor(R.color.primary_text));
+            mTextTemperaturePaint = new Paint();
+            mTextTemperaturePaint = createTextPaint(resources.getColor(R.color.secondary_text));
+
+
+            mLinePaint=new Paint();
+            mLinePaint.setColor(getResources().getColor(R.color.secondary_text));
+            mLinePaint.setStrokeWidth(0.8f);
+            mLinePaint.setAntiAlias(true);
+
+            mWeatherIcon= BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
 
             mTime = new Time();
         }
@@ -139,6 +172,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
             Paint paint = new Paint();
             paint.setColor(textColor);
             paint.setTypeface(NORMAL_TYPEFACE);
+            paint.setAntiAlias(true);
+            return paint;
+        }
+
+        private Paint createBoldTextPaint(int textColor) {
+            Paint paint = new Paint();
+            paint.setColor(textColor);
+            paint.setTypeface(BOLD_TYPEFACE);
             paint.setAntiAlias(true);
             return paint;
         }
@@ -188,10 +229,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
             boolean isRound = insets.isRound();
             mXOffset = resources.getDimension(isRound
                     ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
-            float textSize = resources.getDimension(isRound
-                    ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
+            mXOffset = resources.getDimension(isRound
+                    ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
 
-            mTextPaint.setTextSize(textSize);
+            mTextTimePaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
+            mTextTimeBoldPaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
+            mTextDatePaint.setTextSize(resources.getDimension(R.dimen.date_text_size));
+            mTextTemperaturePaint.setTextSize(resources.getDimension(R.dimen.temp_text_size));
+            mTextTemperatureBoldPaint.setTextSize(resources.getDimension(R.dimen.temp_text_size));
         }
 
         @Override
@@ -212,7 +257,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                    mTextPaint.setAntiAlias(!inAmbientMode);
+                    mTextTimePaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -235,10 +280,52 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             mTime.setToNow();
-            String text = mAmbient
-                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+//            String text = mAmbient
+//                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
+//                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
+//            canvas.drawText(text, mXOffset, mYOffset, mTextTimePaint);
+
+
+            int spaceY = 20;
+            int spaceX = 10;
+            int mTextDatePaintHeight;
+
+
+            int centerX = bounds.width() / 2;
+            int centerY = bounds.height() / 2;
+
+
+            String text;
+            text = "FRI, JUL 14 2015";
+            mTextDatePaint.getTextBounds(text, 0, text.length(), mTextBounds);
+            canvas.drawText(text, centerX - mTextBounds.width() / 2, centerY, mTextDatePaint);
+
+
+            mTextDatePaintHeight= mTextBounds.height();
+
+            text = "15:";
+            mTextTimeBoldPaint.getTextBounds(text, 0, text.length(), mTextBounds);
+            canvas.drawText(text, centerX - mTextBounds.width(), centerY - spaceY-mTextDatePaintHeight, mTextTimeBoldPaint);
+
+            text = "50";
+            mTextTimePaint.getTextBounds(text, 0, text.length(), mTextBounds);
+            canvas.drawText(text, centerX+4 , centerY - spaceY-mTextDatePaintHeight, mTextTimePaint);
+
+            canvas.drawLine(centerX - 20, centerY + spaceY, centerX + 20, centerY + spaceY, mLinePaint);
+
+            text = "25" + (char) 0x00B0;
+            mTextTemperatureBoldPaint.getTextBounds(text, 0, text.length(), mTextBounds);
+            canvas.drawText(text, centerX - mTextBounds.width() / 2, centerY + spaceY + spaceY+mTextBounds.height(), mTextTemperatureBoldPaint);
+
+            text = "16" + (char) 0x00B0;
+            canvas.drawText(text, centerX + mTextBounds.width() / 2 + spaceX, centerY + spaceY + spaceY+mTextBounds.height(), mTextTemperaturePaint);
+
+
+                        canvas.drawBitmap(mWeatherIcon,
+                                centerX - mTextBounds.width() / 2 - spaceX - mWeatherIcon.getWidth(),
+                                centerY + spaceY + spaceY+mTextBounds.height()/2 - mWeatherIcon.getHeight() / 2,
+                                null);
+
         }
 
         /**
