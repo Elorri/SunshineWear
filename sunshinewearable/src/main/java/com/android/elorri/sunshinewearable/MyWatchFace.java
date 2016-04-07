@@ -115,19 +115,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
         boolean mAmbient;
-        Time mTime;
 
         Date mToday;
         SimpleDateFormat mDateFormat;
         SimpleDateFormat mHourFormat;
         SimpleDateFormat mMinFormat;
-        SimpleDateFormat mSecFormat;
 
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mTime.clear(intent.getStringExtra("time-zone"));
-                mTime.setToNow();
                 mDateFormat.setTimeZone(TimeZone.getDefault());
                 mHourFormat.setTimeZone(TimeZone.getDefault());
                 mMinFormat.setTimeZone(TimeZone.getDefault());
@@ -184,21 +180,18 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mLinePaint.setStrokeWidth(0.8f);
             mLinePaint.setAntiAlias(true);
 
-            //mWeatherInteractiveIcon = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
-
-            int resID = getResources().getIdentifier("ic_" + "clear" , "drawable", getPackageName());
+             int resID = getResources().getIdentifier("ic_" + "clear" , "drawable", getPackageName());
             int resIDBW = getResources().getIdentifier("ic_" + "clear" + "_bw" , "drawable", getPackageName());
 
             mWeatherInteractiveIcon = BitmapFactory.decodeResource(getResources(), resID);
             mWeatherAmbientIcon = BitmapFactory.decodeResource(getResources(), resIDBW);
 
-            mTime = new Time();
 
             mToday=Calendar.getInstance().getTime();
             mDateFormat=new SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault());
             mHourFormat=new SimpleDateFormat("HH:", Locale.getDefault());
             mMinFormat=new SimpleDateFormat("mm", Locale.getDefault());
-            //mSecFormat=new SimpleDateFormat(":ss", Locale.getDefault());
+
             mDateFormat.setTimeZone(TimeZone.getDefault());
             mHourFormat.setTimeZone(TimeZone.getDefault());
             mMinFormat.setTimeZone(TimeZone.getDefault());
@@ -235,8 +228,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 registerReceiver();
 
                 // Update time zone in case it changed while we weren't visible.
-                mTime.clear(TimeZone.getDefault().getID());
-                mTime.setToNow();
                 mDateFormat.setTimeZone(TimeZone.getDefault());
                 mHourFormat.setTimeZone(TimeZone.getDefault());
                 mMinFormat.setTimeZone(TimeZone.getDefault());
@@ -354,17 +345,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 weatherIcon=mWeatherInteractiveIcon;
             }
 
-            // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
-//            float mYOffset = getResources().getDimension(R.dimen.digital_y_offset);
-//            float mXOffset = getResources().getDimension(R.dimen.digital_x_offset);
-//            mTime.setToNow();
-//            String text = mAmbient
-//                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-//                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
-//            canvas.drawText(text, mXOffset, mYOffset, mTimeHourPaint);
-
-
-
 
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), backgroundPaint);
 
@@ -405,30 +385,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
             canvas.drawText(text, centerX + mTextBounds.width() / 2 + spaceX, centerY + spaceY + spaceY+mTextBounds.height(), mTemperatureMinPaint);
 
 
-                        canvas.drawBitmap(weatherIcon,
+            canvas.drawBitmap(weatherIcon,
                                 centerX - mTextBounds.width() / 2 - spaceX - weatherIcon.getWidth(),
                                 centerY + spaceY + spaceY+mTextBounds.height()/2 - weatherIcon.getHeight() / 2,
                                 null);
 
-
-//            if (isInAmbientMode()) {
-//                text = "50";
-//                text = mMinFormat.format(mToday);
-//                mTimeMinPaint.getTextBounds(text, 0, text.length(), mTextBounds);
-//                canvas.drawText(text, centerX - mTextBounds.width() / 2, centerY - spaceY - textDatePaintHeight, mTimeMinPaint);
-//
-//                timeMinPaintWidth = mTextBounds.width();
-//                text = "15:";
-//                text = mHourFormat.format(mToday);
-//                mTimeHourPaint.getTextBounds(text, 0, text.length(), mTextBounds);
-//                canvas.drawText(text, centerX - timeMinPaintWidth / 2 - 4 - mTextBounds.width(), centerY - spaceY - textDatePaintHeight, mTimeHourPaint);
-//
-//                text = mSecFormat.format(mToday);
-//                mTimeSecPaint.getTextBounds(text, 0, text.length(), mTextBounds);
-//                canvas.drawText(text, centerX + timeMinPaintWidth / 2 + 4, centerY - spaceY - textDatePaintHeight, mTimeSecPaint);
-//            }else{
-//
-//                }
 
         }
 
