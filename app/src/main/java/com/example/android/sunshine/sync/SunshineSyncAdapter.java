@@ -58,7 +58,9 @@ import java.net.URL;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
-public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
+public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener{
     public final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
 
     public static final String ACTION_DATA_UPDATED =
@@ -88,6 +90,24 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int INDEX_MAX_TEMP = 1;
     private static final int INDEX_MIN_TEMP = 2;
     private static final int INDEX_SHORT_DESC = 3;
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+        Log.v("Watch log", "Wearable connected to handheld device");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+        Log.v("Watch Log", "Wearable connection to handheld device is suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+        Log.e("Watch Log", "Wearable connection failed");
+    }
 
 
     @Retention(RetentionPolicy.SOURCE)
@@ -334,6 +354,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                     int artResourceId = Utility.getArtResourceForWeatherCondition(weatherId);
                     String artUrl = Utility.getArtUrlForWeatherCondition(context, weatherId);
 
+                    Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "artUrl "+artUrl);
+
                     // On Honeycomb and higher devices, we can retrieve the size of the large icon
                     // Prior to that, we use a fixed size
                     @SuppressLint("InlinedApi")
@@ -413,39 +435,20 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private void syncWearable(double high, double low) {
         Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Context context = getContext();
-        final GoogleApiClient mGoogleApiClient;
-        boolean mResolvingError = false;
+
 
         final String WEARABLE_PATH = "/sunshine";
         final String SUNSHINE_TEMP_HIGH_KEY = "sunshine_temp_high_key";
         final String SUNSHINE_TEMP_LOW_KEY = "sunshine_temp_low_key";
 
 
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
+        final GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(Wearable.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
-                        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                        Log.v("Watch log", "Wearable connected to handheld device");
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                        Log.v("Watch Log", "Wearable connection to handheld device is suspended");
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(ConnectionResult result) {
-                        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                        Log.e("Watch Log", "Wearable connection failed");
-                    }
-                })
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
-
         mGoogleApiClient.connect();
+
 
         //create path where the data item will be stored on the wearable
         PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(WEARABLE_PATH);

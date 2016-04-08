@@ -16,6 +16,7 @@
 
 package com.android.elorri.sunshinewearable;
 
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -100,7 +101,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
         }
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener,
+            GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener{
         private final Handler mUpdateTimeHandler = new EngineHandler(this);
         private boolean mRegisteredTimeZoneReceiver = false;
         private  Paint mBackgroundInteractivePaint;
@@ -143,25 +146,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
         final String SUNSHINE_TEMP_HIGH_KEY = "sunshine_temp_high_key";
         final String SUNSHINE_TEMP_LOW_KEY = "sunshine_temp_low_key";
 
-        private GoogleApiClient mGoogleApiClient;
-        DataApi.DataListener mDataListener=new DataApi.DataListener(){
-            @Override
-            public void onDataChanged(DataEventBuffer dataEvents) {
-                Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                for (DataEvent event : dataEvents) {
-                    if (event.getType() == DataEvent.TYPE_CHANGED) {
-                        String path = event.getDataItem().getUri().getPath();
-                        if(path.equals(SUNSHINE_PATH)){
-                            DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                            mHighTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_HIGH_KEY);
-                            mLowTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_LOW_KEY);
-                        }else{
-                            Log.e("Watch Log", "Unknown path "+path);
-                        }
-                    }
-                }
-            }
-        };
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(MyWatchFace.this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
 
 
 
@@ -225,32 +214,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mMinFormat.setTimeZone(TimeZone.getDefault());
 
 
-            mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                        @Override
-                        public void onConnected(Bundle bundle) {
-                            Log.v("Handheld log", "Handheld connected to wearable device");
-                            Wearable.DataApi.addListener(mGoogleApiClient, mDataListener);
-                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                        }
-
-                        @Override
-                        public void onConnectionSuspended(int i) {
-                            Log.v("Handheld Log", "Handheld connection to wearable device is suspended");
-                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                        }
-                    })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(ConnectionResult result) {
-                            Log.e("Handheld Log", "Handheld connection failed");
-                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                        }
-                    })
-                    .build();
-
-
         }
 
         @Override
@@ -289,7 +252,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             } else {
                 unregisterReceiver();
                 if(mGoogleApiClient!=null&&mGoogleApiClient.isConnected()){
-                    Wearable.DataApi.removeListener(mGoogleApiClient, mDataListener);
+                    Wearable.DataApi.removeListener(mGoogleApiClient, this);
                     mGoogleApiClient.disconnect();
                 }
             }
@@ -478,6 +441,43 @@ public class MyWatchFace extends CanvasWatchFaceService {
                         - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
             }
+        }
+
+        @Override
+        public void onConnected(Bundle bundle) {
+            Log.v("Handheld log", "Handheld connected to wearable device");
+            Wearable.DataApi.addListener(mGoogleApiClient, this);
+            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.v("Handheld Log", "Handheld connection to wearable device is suspended");
+            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+        }
+
+        @Override
+        public void onDataChanged(DataEventBuffer dataEvents) {
+            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+            for (DataEvent event : dataEvents) {
+                if (event.getType() == DataEvent.TYPE_CHANGED) {
+                    String path = event.getDataItem().getUri().getPath();
+                    if(path.equals(SUNSHINE_PATH)){
+                        DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+                        mHighTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_HIGH_KEY);
+                        mLowTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_LOW_KEY);
+                        mLowTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_LOW_KEY);
+                    }else{
+                        Log.e("Watch Log", "Unknown path "+path);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+            Log.e("Handheld Log", "Handheld connection failed");
+            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         }
     }
 }
