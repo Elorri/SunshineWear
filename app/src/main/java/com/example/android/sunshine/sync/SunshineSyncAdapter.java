@@ -57,10 +57,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        ConnectionCallbacks,
+        OnConnectionFailedListener  {
+
     public final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
 
     public static final String ACTION_DATA_UPDATED =
@@ -69,8 +72,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
     // Interval at which to sync with the weather, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
-    //public static final int SYNC_INTERVAL = 60 * 180;
-    public static final int SYNC_INTERVAL = 30;
+    public static final int SYNC_INTERVAL = 60 * 180;
+    //public static final int SYNC_INTERVAL = 30;
     //public static final int SYNC_INTERVAL = 60 * 720;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
@@ -91,19 +94,19 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
     private static final int INDEX_MIN_TEMP = 2;
     private static final int INDEX_SHORT_DESC = 3;
 
-    @Override
+    @Override //ConnectionCallbacks
     public void onConnected(Bundle bundle) {
         Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Log.v("Watch log", "Wearable connected to handheld device");
     }
 
-    @Override
+    @Override //ConnectionCallbacks
     public void onConnectionSuspended(int i) {
         Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Log.v("Watch Log", "Wearable connection to handheld device is suspended");
     }
 
-    @Override
+    @Override //OnConnectionFailedListener
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Log.e("Watch Log", "Wearable connection failed");
@@ -121,9 +124,17 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
     public static final int LOCATION_STATUS_UNKNOWN = 3;
     public static final int LOCATION_STATUS_INVALID = 4;
 
+    final GoogleApiClient mGoogleApiClient;
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+
+     mGoogleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        mGoogleApiClient.connect();
     }
 
 
@@ -295,6 +306,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
             }
             notifyWeather();
+            syncWearable();
             Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted");
             setLocationStatus(getContext(), LOCATION_STATUS_OK);
         } catch (JSONException e) {
@@ -303,6 +315,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_INVALID);
         }
     }
+
+
 
     private void updateWidgets() {
         Context context = getContext();
@@ -322,6 +336,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
     }
 
     private void notifyWeather() {
+        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Context context = getContext();
         //checking the last update and notify if it' the first of the day
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -333,8 +348,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
             String lastNotificationKey = context.getString(R.string.pref_last_notification);
             long lastSync = prefs.getLong(lastNotificationKey, 0);
-
-            if (System.currentTimeMillis() - lastSync >= DAY_IN_MILLIS) {
+           // if (System.currentTimeMillis() - lastSync >= DAY_IN_MILLIS) {
                 // Last sync was more than 1 day ago, let's send a notification with the weather.
                 String locationQuery = Utility.getPreferredLocation(context);
 
@@ -353,8 +367,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
                     Resources resources = context.getResources();
                     int artResourceId = Utility.getArtResourceForWeatherCondition(weatherId);
                     String artUrl = Utility.getArtUrlForWeatherCondition(context, weatherId);
-
-                    Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "artUrl "+artUrl);
 
                     // On Honeycomb and higher devices, we can retrieve the size of the large icon
                     // Prior to that, we use a fixed size
@@ -419,59 +431,73 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
                             (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
                     // WEATHER_NOTIFICATION_ID allows you to update the notification later on.
                     mNotificationManager.notify(WEATHER_NOTIFICATION_ID, mBuilder.build());
-
-                    syncWearable( high, low);
-
                     //refreshing last sync
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putLong(lastNotificationKey, System.currentTimeMillis());
                     editor.commit();
                 }
                 cursor.close();
-            }
+        //    }
         }
     }
 
-    private void syncWearable(double high, double low) {
+    private void syncWearable() {
+        // we'll query our contentProvider, as always
+        String locationQuery = Utility.getPreferredLocation(getContext());
+        Uri weatherUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationQuery, System.currentTimeMillis());
+        Cursor cursor = getContext().getContentResolver().query(weatherUri, NOTIFY_WEATHER_PROJECTION, null, null, null);
+        if (cursor.moveToFirst()) {
+            int weatherId = cursor.getInt(INDEX_WEATHER_ID);
+            double high = cursor.getDouble(INDEX_MAX_TEMP);
+            double low = cursor.getDouble(INDEX_MIN_TEMP);
+            syncWearable(weatherId, high, low);
+        }
+    }
+
+    private void syncWearable(int weatherId, double high, double low) {
         Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-        Context context = getContext();
 
+        if (!mGoogleApiClient.isConnected()) {
+            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+            return;
+        }
 
-        final String WEARABLE_PATH = "/sunshine";
+        final String WEARABLE_PATH = "/wearable";
         final String SUNSHINE_TEMP_HIGH_KEY = "sunshine_temp_high_key";
         final String SUNSHINE_TEMP_LOW_KEY = "sunshine_temp_low_key";
-
-
-        final GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        mGoogleApiClient.connect();
+        final String SUNSHINE_WEATHER_ID_KEY = "sunshine_weather_id_key";
 
 
         //create path where the data item will be stored on the wearable
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(WEARABLE_PATH);
+        PutDataMapRequest dataMap = PutDataMapRequest.create(WEARABLE_PATH);
 
         //Add data to the data item
-        putDataMapRequest.getDataMap().putString(SUNSHINE_TEMP_HIGH_KEY, Utility.formatTemperature(context, high));
-        putDataMapRequest.getDataMap().putString(SUNSHINE_TEMP_LOW_KEY, Utility.formatTemperature(context, low));
+        dataMap.getDataMap().putString(SUNSHINE_TEMP_HIGH_KEY, Utility.formatTemperature(getContext(), high));
+        dataMap.getDataMap().putString(SUNSHINE_TEMP_LOW_KEY, Utility.formatTemperature(getContext(), low));
+        dataMap.getDataMap().putInt(SUNSHINE_WEATHER_ID_KEY, weatherId);
+        dataMap.setUrgent();
 
         //store the data item on the wearable on the path given above
-        PutDataRequest request = putDataMapRequest.asPutDataRequest();
-        Wearable.DataApi.putDataItem(mGoogleApiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-            @Override
-            public void onResult(DataApi.DataItemResult dataItemResult) {
-                if (dataItemResult.getStatus().isSuccess()) {
-                    Log.v("Watch Log", "Successfully send weather info");
-                    Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                } else {
-                    Log.e("Watch Log", "Failed to send weather info ");
-                    Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-                }
-                mGoogleApiClient.disconnect();
-            }
-        });
+        PutDataRequest request = dataMap.asPutDataRequest();
+        request.setUrgent();
+
+        Log.e("DataLayer", Thread.currentThread().getStackTrace()[2] + "");
+        Wearable.DataApi.putDataItem(mGoogleApiClient, request)
+                .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                    @Override
+                    public void onResult(DataApi.DataItemResult dataItemResult) {
+                        if (dataItemResult.getStatus().isSuccess()) {
+                            Log.v("Watch Log", "Successfully send weather info");
+                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+                        } else {
+                            Log.e("Watch Log", "Failed to send weather info ");
+                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
+                        }
+                        //TODO remove this line if unneeded, and put it somewhere else
+                        mGoogleApiClient.disconnect();
+                    }
+                });
+
     }
 
     /**

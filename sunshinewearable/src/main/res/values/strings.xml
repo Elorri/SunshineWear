@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Sunshine Wearable</string>
     <string name="my_digital_name">Sunshine WatchFace</string>
+    <string name="weather_info_not_available">Weather unknown</string>
 </resources>
