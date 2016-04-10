@@ -139,7 +139,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
                 mDateFormat.setTimeZone(TimeZone.getDefault());
                 mHourFormat.setTimeZone(TimeZone.getDefault());
                 mMinFormat.setTimeZone(TimeZone.getDefault());
@@ -162,8 +161,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
-
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
@@ -257,7 +254,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2]+"");
             if (visible) {
                 registerReceiver();
                 // Update time zone in case it changed while we weren't visible.
@@ -265,7 +261,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 mHourFormat.setTimeZone(TimeZone.getDefault());
                 mMinFormat.setTimeZone(TimeZone.getDefault());
                 mGoogleApiClient.connect();
-                Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "google api is connected");
             } else {
                 unregisterReceiver();
                 if(mGoogleApiClient!=null&&mGoogleApiClient.isConnected()){
@@ -299,7 +294,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
             Resources resources = MyWatchFace.this.getResources();
 
             mTimeHourPaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
@@ -320,14 +314,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
             invalidate();
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
             if (mAmbient != inAmbientMode) {
 
                 mAmbient = inAmbientMode;
@@ -366,7 +358,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             // Whether the timer should be running depends on whether we're visible (as well as
             // whether we're in ambient mode), so we may need to start or stop the timer.
-            //TODO if we don't display the sec, I don't think we need that, the 1 per min refresh caused by the onTick method should be enough
             updateTimer();
         }
 
@@ -376,7 +367,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             Paint backgroundPaint;
             Bitmap weatherIcon;
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "" );
             if (isInAmbientMode()) {
                 backgroundPaint=mBackgroundAmbientPaint;
                 weatherIcon=mWeatherAmbientIcon;
@@ -385,8 +375,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 weatherIcon=mWeatherInteractiveIcon;
             }
 
-
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "" );
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), backgroundPaint);
 
             int spaceY = 20;
@@ -474,39 +462,31 @@ public class MyWatchFace extends CanvasWatchFaceService {
         public void onConnected(Bundle bundle) {
             Log.v("Handheld log", "Handheld connected to wearable device");
                 Wearable.DataApi.addListener(mGoogleApiClient, this);
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         }
 
         @Override //GoogleApiClient.ConnectionCallbacks
         public void onConnectionSuspended(int i) {
             Log.v("Handheld Log", "Handheld connection to wearable device is suspended");
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         }
 
 
         @Override //GoogleApiClient.OnConnectionFailedListener
         public void onConnectionFailed(ConnectionResult connectionResult) {
             Log.e("Handheld Log", "Handheld connection failed");
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         }
 
         @Override //DataApi.DataListener
         public void onDataChanged(DataEventBuffer dataEvents) {
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
             for (DataEvent event : dataEvents) {
-                Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
                 if (event.getType() == DataEvent.TYPE_CHANGED) {
                     String path = event.getDataItem().getUri().getPath();
-                    Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "path "+path);
                     if (WEARABLE_PATH.equals(path)) {
-                        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
                         DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                         mHighTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_HIGH_KEY);
                         mLowTemperature = dataMapItem.getDataMap().getString(SUNSHINE_TEMP_LOW_KEY);
                         mWeatherIcon = Utility.getArtUrlForWeatherCondition((long)dataMapItem.getDataMap().getInt(SUNSHINE_WEATHER_ID_KEY));
                         mWeatherInteractiveIcon = setWeatherInteractiveIcon(mWeatherIcon);
                         mWeatherAmbientIcon = setWeatherAmbientIcon(mWeatherIcon);
-                        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "" + mHighTemperature + "/"+ mLowTemperature+" "+ mWeatherIcon);
                         invalidate();
                     }else{
                         Log.e("Watch Log", "Unrecognized path: " + path);

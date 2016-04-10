@@ -96,13 +96,11 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
     @Override //ConnectionCallbacks
     public void onConnected(Bundle bundle) {
-        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Log.v("Watch log", "Wearable connected to handheld device");
     }
 
     @Override //ConnectionCallbacks
     public void onConnectionSuspended(int i) {
-        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Log.v("Watch Log", "Wearable connection to handheld device is suspended");
     }
 
@@ -336,7 +334,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
     }
 
     private void notifyWeather() {
-        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Context context = getContext();
         //checking the last update and notify if it' the first of the day
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -455,11 +452,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
     }
 
     private void syncWearable(int weatherId, double high, double low) {
-        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-
         if (!mGoogleApiClient.isConnected()) {
-            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
-            return;
+           return;
         }
 
         final String WEARABLE_PATH = "/wearable";
@@ -481,19 +475,15 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
         PutDataRequest request = dataMap.asPutDataRequest();
         request.setUrgent();
 
-        Log.e("DataLayer", Thread.currentThread().getStackTrace()[2] + "");
         Wearable.DataApi.putDataItem(mGoogleApiClient, request)
                 .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
                     @Override
                     public void onResult(DataApi.DataItemResult dataItemResult) {
                         if (dataItemResult.getStatus().isSuccess()) {
                             Log.v("Watch Log", "Successfully send weather info");
-                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
                         } else {
                             Log.e("Watch Log", "Failed to send weather info ");
-                            Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
                         }
-                        //TODO remove this line if unneeded, and put it somewhere else
                         mGoogleApiClient.disconnect();
                     }
                 });
@@ -552,7 +542,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.e("Sunshinewear", Thread.currentThread().getStackTrace()[2] + "");
         Log.d(LOG_TAG, "Starting sync");
 
         String locationQuery = Utility.getPreferredLocation(getContext());
