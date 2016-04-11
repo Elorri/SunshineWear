@@ -13,14 +13,8 @@ public class SunshineSyncService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
-                " : SunshineSyncService :  object created");
-        Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
-                " : sSyncAdapterLock :  object created");
         synchronized (sSyncAdapterLock) {
             if (sSunshineSyncAdapter == null) {
-                Log.d("Lifecycle", Thread.currentThread().getStackTrace()[2] + ": " + Utility.thread() + " : " +
-                        " : SunshineSyncAdapter :  object created");
                 sSunshineSyncAdapter = new SunshineSyncAdapter(getApplicationContext(), true);
             }
         }
