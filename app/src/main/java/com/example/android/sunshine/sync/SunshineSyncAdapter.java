@@ -569,7 +569,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
             final String API_KEY = "APPID";
-            final String API_KEY_VALUE = "f433cde01d664c71db857ef778034ecd";
+            final String API_KEY_VALUE = "your_api_key_here";
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                     .appendQueryParameter(QUERY_PARAM, locationQuery)

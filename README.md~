@@ -4,12 +4,12 @@ This repository contains the app Sunshine Wearable, which is part of the Android
 
 ## Features
 
-This app add a watchface to the common set of watchface already present on user watch.
-The watchface communication with the handheld Sunshine app in order to display
+This app add a watchface to the common set of watchfaces already present on user watch.
+The watchface communicate with the handheld Sunshine app in order to display
 
 - the current time
 - the high and low temperature for the day and user chosen location
-- a icon representing the weather
+- an icon representing the weather
 
 The watchface adapt itself to round and squares watches.
 
@@ -17,11 +17,15 @@ The watchface adapt itself to round and squares watches.
 
 * [Sunshine app module for the phone/tablet app](https://github.com/udacity/Advanced_Android_Development/tree/7.05_Pretty_Wallpaper_Time)
 * [Set of gray icons taken from 'asheshb'](https://github.com/asheshb/ubiquitous)
+* [Google Play Services Wearable 8.4](https://developers.google.com/android/reference/com/google/android/gms/wearable/package-summary)
+* [Android Support Wearable 1.4](http://developer.android.com/reference/android/support/wearable/package-summary.html)
 
 ## API key needed
 
-This app uses the [The Tmdb Movie Database](https://www.themoviedb.org/documentation/api) that need an API key to retrieve its data. 
-This API key should be pasted in the TmdbSync.java file.
+This app uses the [Open Weather Map database](http://openweathermap.org/appid) that need an API key to retrieve its data. 
+This API key should be pasted in the mobile SunshineSyncAdapter.java file as follow : 
+
+	final String API_KEY_VALUE = "your_api_key_here";
 
 
 ## License
